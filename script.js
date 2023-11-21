@@ -11,11 +11,15 @@ let lastX = 0;
 let lastY = 0;
 
 // Load our model.
+
 const sess = new onnx.InferenceSession();
-const loadingModelPromise = sess.loadModel("./model.onnx");
+const loadingModelPromise = sess.loadModel("./model.onnx");  
+
+const mysess = new onnx.InferenceSession();
+const loadModel = mysess.loadModel("./onnxmodel.onnx")
 
 // Add 'Draw a number here!' to the canvas.
-ctx.lineWidth = 28;
+ctx.lineWidth = 15;
 ctx.lineJoin = "round";
 ctx.font = "28px sans-serif";
 ctx.textAlign = "center";
@@ -49,12 +53,21 @@ async function updatePredictions() {
   // Get the predictions for the canvas data.
   const imgData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
   const input = new onnx.Tensor(new Float32Array(imgData.data), "float32");
+  console.log(input.shape);
+
 
   const outputMap = await sess.run([input]);
   const outputTensor = outputMap.values().next().value;
   const predictions = outputTensor.data;
-  const maxPrediction = Math.max(...predictions);
+  //console.log(sess.get_inputs()[0].shape)
 
+ 
+  // const out = await mysess.run(input);
+  // const outputTensor = out.values().next().value;
+  // const predictions = outputTensor.data;
+
+
+  const maxPrediction = Math.max(...predictions);
   for (let i = 0; i < predictions.length; i++) {
     const element = document.getElementById(`prediction-${i}`);
     element.children[0].children[0].style.height = `${predictions[i] * 100}%`;
